@@ -1,62 +1,67 @@
 services:
-  # nginx
   web:
+    platform: ${DOCKER_PLATFORM:-linux/amd64}
     build:
       context: .
       dockerfile: Dockerfile
-    image: php:8.2-apache
-    platform: linux/amd64
+      args:
+        PHP_VERSION: ${PHP_VERSION:-8.2}
+    image: tes-app:php-${PHP_VERSION:-8.2}
     ports:
-      - "80:80"
-    volumes:
-      - ./public:/var/www/html  # دایرکتوری public به Nginx متصل می‌شود
-      - ./php.ini:/usr/local/etc/php/conf.d/custom.ini
-    networks:
-      - app-network
-
-  # php
-  app:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    image: php:8.2-fpm
-    platform: linux/amd64
-    volumes:
-      - ./public:/var/www/html  # دایرکتوری public به PHP متصل می‌شود
-    networks:
-      - app-network
-
-  # mysql
-  db:
-    image: mysql:latest
-    platform: linux/amd64
+      - "${APP_PORT:-80}:80"
     environment:
-      MYSQL_ROOT_PASSWORD: root_password
-      MYSQL_DATABASE: my_database
-      MYSQL_USER: user
-      MYSQL_PASSWORD: user_password
-    ports:
-      - "3306:3306"
+      CI_ENV: ${CI_ENV:-development}
+      APP_BASE_URL: ${APP_BASE_URL:-http://localhost/MyApp/}
+      APP_CDN_URL: ${APP_CDN_URL:-http://localhost/MyApp/theme/}
+      APP_TIMEZONE: ${APP_TIMEZONE:-Asia/Tehran}
+      DB_HOST: db
+      DB_USERNAME: ${MARIADB_USER:-user}
+      DB_PASSWORD: ${MARIADB_PASSWORD:-user_password}
+      DB_DATABASE: ${MARIADB_DATABASE:-my_database}
+      DB_DRIVER: mysqli
     volumes:
-      - db_data:/var/lib/mysql
-    networks:
-      - app-network
+      - ./public:/var/www/html
+      - ./public/php.ini:/usr/local/etc/php/conf.d/zz-custom.ini:ro
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
 
-  # phpMyAdmin
-  phpmyadmin:
-    image: phpmyadmin/phpmyadmin
-    platform: linux/amd64
+  db:
+    platform: ${DOCKER_PLATFORM:-linux/amd64}
+    image: mariadb:${MARIADB_VERSION:-12.3.3}
     ports:
-      - "3307:80"  # پورت phpMyAdmin
+      - "${MARIADB_PORT:-3306}:3306"
+    environment:
+      MARIADB_ROOT_PASSWORD: ${MARIADB_ROOT_PASSWORD:-root_password}
+      MARIADB_DATABASE: ${MARIADB_DATABASE:-my_database}
+      MARIADB_USER: ${MARIADB_USER:-user}
+      MARIADB_PASSWORD: ${MARIADB_PASSWORD:-user_password}
+    volumes:
+      - mariadb_data:/var/lib/mysql
+      - ./public/my.cnf:/etc/mysql/conf.d/custom.cnf:ro
+      - ./database/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 20s
+    restart: unless-stopped
+
+  phpmyadmin:
+    platform: ${DOCKER_PLATFORM:-linux/amd64}
+    image: phpmyadmin:5-apache
+    ports:
+      - "${PHPMYADMIN_PORT:-8081}:80"
     environment:
       PMA_HOST: db
-      MYSQL_ROOT_PASSWORD: root_password
+      PMA_PORT: 3306
       UPLOAD_LIMIT: 300M
-    networks:
-      - app-network
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
 
 volumes:
-  db_data:
-
-networks:
-  app-network:
+  mariadb_data:
