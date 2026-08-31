@@ -81,8 +81,8 @@ The root URL, <http://localhost>, intentionally does not open an application dir
 Clone the repository and start the services:
 
 ```sh
-git clone https://github.com/ourdomain72/docker_config.git
-cd docker_config
+git clone https://github.com/ourdomain72/dockforge-php-stack.git
+cd dockforge-php-stack
 docker compose up -d --build
 ```
 
