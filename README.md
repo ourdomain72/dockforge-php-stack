@@ -4,7 +4,7 @@ This repository provides a local Docker development environment with:
 
 - Apache and PHP, switchable from PHP 7.4 through PHP 8.4
 - MariaDB 12.3.3
-- phpMyAdmin 5
+- phpMyAdmin 5.2.3
 - Apache `mod_rewrite` and `mod_headers`
 - The PHP `mysqli`, Redis, and OPcache extensions
 - A Redis 7 service with a health check
@@ -502,4 +502,5 @@ Example app:  http://localhost/MyApp
 phpMyAdmin:   http://localhost:8081
 MariaDB:      12.3.3
 Redis:        7
+phpMyAdmin:   5.2.3
 ```
