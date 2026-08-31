@@ -102,7 +102,7 @@ The MariaDB root account can also be used locally:
 
 ### Application database connection
 
-Containers communicate over the internal Docker network. Applications running in the `web` container receive these values automatically:
+Containers communicate over the internal Docker network. Each application should define these values in its own `.env` file:
 
 | Setting | Default value |
 | --- | --- |
@@ -113,7 +113,7 @@ Containers communicate over the internal Docker network. Applications running in
 | Password | `user_password` |
 | Driver | `mysqli` |
 
-Do not use `localhost` as the database host from a PHP application running inside Docker. In a container, `localhost` refers to that same container; the MariaDB service hostname is `db`.
+The Compose file intentionally does not inject `DB_*` variables into the `web` service. This ensures that each application remains the only authority for its own database connection. Do not use `localhost` as the database host from a PHP application running inside Docker. In a container, `localhost` refers to that same container; the MariaDB service hostname is `db`.
 
 For a database client running directly on the host machine, use:
 
@@ -135,18 +135,18 @@ Copy `.env.example` to `.env` before making local changes. The `.env` file is ig
 | `DOCKER_PLATFORM` | `linux/amd64` | Keeps legacy PHP images usable on Intel and Apple Silicon |
 | `APP_PORT` | `80` | Host port for Apache |
 | `PHPMYADMIN_PORT` | `8081` | Host port for phpMyAdmin |
-| `MARIADB_VERSION` | `12.3.3` | Pinned MariaDB image version |
-| `MARIADB_PORT` | `3306` | Host port published for MariaDB |
-| `MARIADB_ROOT_PASSWORD` | `root_password` | MariaDB root password |
-| `MARIADB_DATABASE` | `my_database` | Database created during first initialization |
-| `MARIADB_USER` | `user` | Application database user |
-| `MARIADB_PASSWORD` | `user_password` | Application database password |
-| `CI_ENV` | `development` | CodeIgniter environment |
-| `APP_BASE_URL` | `http://localhost/MyApp/` | Example application base URL |
-| `APP_CDN_URL` | `http://localhost/MyApp/theme/` | Example theme/static asset URL |
-| `APP_TIMEZONE` | `Asia/Tehran` | Application timezone |
+| `DB_SERVER_VERSION` | `12.3.3` | Pinned MariaDB image version |
+| `DB_PUBLISHED_PORT` | `3306` | MariaDB port published on the host |
+| `DB_HOST` | `db` | Database hostname used inside Docker |
+| `DB_PORT` | `3306` | Database port used inside Docker |
+| `DB_ROOT_PASSWORD` | `root_password` | MariaDB root password |
+| `DB_DATABASE` | `my_database` | Application database name |
+| `DB_USERNAME` | `user` | Application database user |
+| `DB_PASSWORD` | `user_password` | Application database password |
+| `DB_DRIVER` | `mysqli` | PHP database driver |
+Application-specific settings such as `DB_*`, `CI_ENV`, `APP_BASE_URL`, `APP_CDN_URL`, and `APP_TIMEZONE` belong in each application's own `.env` file and are not injected by Compose.
 
-If `APP_PORT` is changed, update `APP_BASE_URL` and `APP_CDN_URL` to include the same port. For example:
+If `APP_PORT` is changed, update the base URL inside each application's `.env` to include the same port. For example:
 
 ```dotenv
 APP_PORT=8080
@@ -204,7 +204,7 @@ Inspect the database version and tables:
 docker compose exec db mariadb -u root -p
 ```
 
-When prompted, enter the value of `MARIADB_ROOT_PASSWORD` from `.env`.
+When prompted, enter the value of `DB_ROOT_PASSWORD` from `.env`.
 
 Import an SQL dump manually into the existing database:
 
@@ -325,7 +325,7 @@ Change the relevant value in `.env`, for example:
 
 ```dotenv
 APP_PORT=8080
-MARIADB_PORT=3307
+DB_PUBLISHED_PORT=3307
 PHPMYADMIN_PORT=8082
 ```
 
