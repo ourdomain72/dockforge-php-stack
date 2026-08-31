@@ -36,14 +36,14 @@ services:
 
   db:
     platform: ${DOCKER_PLATFORM:-linux/amd64}
-    image: mariadb:${DB_SERVER_VERSION:?Set DB_SERVER_VERSION in .env}
+    image: mariadb:${DB_SERVER_VERSION:-12.3.3}
     ports:
-      - "${DB_PUBLISHED_PORT:?Set DB_PUBLISHED_PORT in .env}:3306"
+      - "${DB_PUBLISHED_PORT:-3306}:3306"
     environment:
-      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:?Set DB_ROOT_PASSWORD in .env}
-      MARIADB_DATABASE: ${DB_DATABASE:?Set DB_DATABASE in .env}
-      MARIADB_USER: ${DB_USERNAME:?Set DB_USERNAME in .env}
-      MARIADB_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD in .env}
+      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-root_password}
+      MARIADB_DATABASE: ${DB_DATABASE:-my_database}
+      MARIADB_USER: ${DB_USERNAME:-user}
+      MARIADB_PASSWORD: ${DB_PASSWORD:-user_password}
     volumes:
       - mariadb_data:/var/lib/mysql
       - ./public/my.cnf:/etc/mysql/conf.d/custom.cnf:ro

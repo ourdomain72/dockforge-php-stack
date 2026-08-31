@@ -57,14 +57,22 @@ The root URL, <http://localhost>, intentionally does not open an application dir
 
 ## Quick start
 
-Clone the repository, create the local environment file, and start the services:
+Clone the repository and start the services:
 
 ```sh
 git clone https://github.com/ourdomain72/docker_config.git
 cd docker_config
+docker compose up -d --build
+```
+
+The stack has development defaults, so `.env` is optional for a first local run. To customize ports, versions, database names, or credentials, create it before starting:
+
+```sh
 cp .env.example .env
 docker compose up -d --build
 ```
+
+The repository provides the Docker runtime, not a complete application checkout. Put each application in its own directory under `public` (for example `public/MyApp`) before opening its URL. Locally present application directories that are ignored or untracked by Git are not included when another user clones this repository.
 
 The initial MariaDB startup can take longer when initialization files are supplied in `database/init`.
 
@@ -130,7 +138,7 @@ For a database client running directly on the host machine, use:
 
 ## Environment variables
 
-Copy `.env.example` to `.env` before making local changes. The `.env` file is ignored by Git.
+The stack can start without `.env` by using the development defaults shown below. Copy `.env.example` to `.env` before making local changes or deploying anywhere beyond an isolated development machine. The `.env` file is ignored by Git.
 
 | Variable | Default | Purpose |
 | --- | --- | --- |
