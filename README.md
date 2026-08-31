@@ -1,6 +1,8 @@
-# Multi-Version PHP, Apache, MariaDB, and phpMyAdmin Docker Environment
+# DockForge PHP Stack
 
-This repository provides a local Docker development environment with:
+**Current version: 1.0.0**
+
+DockForge PHP Stack is a reproducible multi-application PHP environment for local development and Docker-based deployments. It provides:
 
 - Apache and PHP, switchable from PHP 7.4 through PHP 8.4
 - MariaDB 12.3.3
@@ -25,6 +27,25 @@ Verify the installation:
 docker --version
 docker compose version
 ```
+
+## Version information
+
+The canonical release version is stored in the root `VERSION` file. The same version is attached to every container through the `com.dockforge.stack.version` label.
+
+Display the repository version:
+
+```sh
+cat VERSION
+```
+
+Display the version label of a running service:
+
+```sh
+docker compose ps -q web | xargs docker inspect \
+  --format '{{ index .Config.Labels "com.dockforge.stack.version" }}'
+```
+
+`STACK_VERSION` in `.env` may override the container label for a packaged release. Keep it synchronized with `VERSION` when publishing a new DockForge release.
 
 ## Project layout
 
@@ -142,6 +163,7 @@ The stack can start without `.env` by using the development defaults shown below
 
 | Variable | Default | Purpose |
 | --- | --- | --- |
+| `STACK_VERSION` | `1.0.0` | DockForge release version attached to container labels |
 | `PHP_VERSION` | `8.2` | PHP/Apache image version; supported range is 7.4–8.4 |
 | `DOCKER_PLATFORM` | `linux/amd64` | Keeps legacy PHP images usable on Intel and Apple Silicon |
 | `APP_PORT` | `80` | Host port for Apache |
